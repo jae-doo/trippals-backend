@@ -1,21 +1,21 @@
 package com.ssafy.trippals.board.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder @Getter @Setter
 public class BoardFile {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int seq;
+    private Integer seq;
 
     private String fileName;
-    private int fileSize;
+    private Long fileSize;
     private String fileContentType;
     private String fileUuid;
 

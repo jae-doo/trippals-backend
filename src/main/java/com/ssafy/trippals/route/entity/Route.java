@@ -22,4 +22,8 @@ public class Route {
     private String overview;
     private String thumbnail;
     private LocalDate startDate;
+
+    public Route(int seq) {
+        this.seq = seq;
+    }
 }

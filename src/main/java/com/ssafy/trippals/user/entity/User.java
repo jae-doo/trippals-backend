@@ -22,4 +22,8 @@ public class User {
     private String email;
     private String profileImage;
     private LocalDate registerDate;
+
+    public User(int seq) {
+        this.seq = seq;
+    }
 }

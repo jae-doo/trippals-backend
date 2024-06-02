@@ -3,18 +3,18 @@ package com.ssafy.trippals.board.entity;
 import com.ssafy.trippals.route.entity.Route;
 import com.ssafy.trippals.user.entity.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder @Getter @Setter
 public class Board {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int seq;
+    private Integer seq;
 
     private String title;
     private String content;
@@ -30,4 +30,8 @@ public class Board {
     @ManyToOne
     @JoinColumn(name = "route_seq")
     private Route route;
+
+    public Board(Integer seq) {
+        this.seq = seq;
+    }
 }

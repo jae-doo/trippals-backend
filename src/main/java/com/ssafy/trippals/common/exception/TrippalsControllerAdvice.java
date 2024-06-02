@@ -62,4 +62,10 @@ public class TrippalsControllerAdvice {
     public ErrorResult handleDupInsertException(DupInsertException ex){
         return new ErrorResult(ErrorCode.RECORD_ALREADY_EXIST,ex.getMessage());
     }
+
+    @ExceptionHandler(BoardNotFoundException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResult handleBoardNotFoundException(BoardNotFoundException ex) {
+        return new ErrorResult(ErrorCode.BOARD_NOT_FOUD, ex.getMessage());
+    }
 }

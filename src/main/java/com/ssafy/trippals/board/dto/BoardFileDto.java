@@ -1,5 +1,7 @@
 package com.ssafy.trippals.board.dto;
 
+import com.ssafy.trippals.board.entity.Board;
+import com.ssafy.trippals.board.entity.BoardFile;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,4 +17,15 @@ public class BoardFileDto {
     private String fileContentType;
     private String fileUUID;
     private LocalDateTime regDt;
+
+    public BoardFile convertToBoardFile() {
+        return BoardFile.builder()
+                .fileName(fileName)
+                .fileSize(fileSize)
+                .fileContentType(fileContentType)
+                .fileUuid(fileUUID)
+                .createDate(regDt)
+                .board(new Board(boardSeq))
+                .build();
+    }
 }
