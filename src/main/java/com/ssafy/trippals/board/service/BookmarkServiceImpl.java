@@ -1,6 +1,5 @@
 package com.ssafy.trippals.board.service;
 
-import com.ssafy.trippals.board.dao.BookmarkDao;
 import com.ssafy.trippals.board.dto.BoardParamDto;
 import com.ssafy.trippals.board.dto.BoardResultDto;
 import com.ssafy.trippals.board.dto.BoardUserVO;
@@ -20,7 +19,7 @@ public class BookmarkServiceImpl implements BookmarkService{
 
         try {
             boardResultDto.setList(bookmarkRepository.findByUserSeq(boardParamDto));
-            boardResultDto.setCount(dao.countBookmark(boardParamDto));
+            boardResultDto.setCount(bookmarkRepository.countBookmark(boardParamDto));
         }catch(Exception e) {
             e.printStackTrace();
         }
@@ -29,7 +28,7 @@ public class BookmarkServiceImpl implements BookmarkService{
 
     @Override
     public int bookmarkInsert(BoardUserVO boardUserVO) {
-        return dao.insertBookmark(boardUserVO);
+        return bookmarkRepository.insertBookmark(boardUserVO);
     }
 
     @Override
@@ -38,7 +37,7 @@ public class BookmarkServiceImpl implements BookmarkService{
     }
     @Override
     public void bookmarkDelete(BoardUserVO boardUserVO) {
-        dao.deleteBookmark(boardUserVO);
+        bookmarkRepository.deleteBookmark(boardUserVO);
     }
 
 }

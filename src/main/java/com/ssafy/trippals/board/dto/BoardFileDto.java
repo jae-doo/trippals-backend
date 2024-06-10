@@ -18,6 +18,16 @@ public class BoardFileDto {
     private String fileUUID;
     private LocalDateTime regDt;
 
+    public BoardFileDto(BoardFile boardFile) {
+        this.fileId = boardFile.getSeq();
+        this.boardSeq = boardFile.getBoard().getSeq();
+        this.fileName = boardFile.getFileName();
+        this.fileSize = boardFile.getFileSize();
+        this.fileContentType = boardFile.getFileContentType();
+        this.fileUUID = boardFile.getFileUuid();
+        this.regDt = boardFile.getCreateDate();
+    }
+
     public BoardFile convertToBoardFile() {
         return BoardFile.builder()
                 .fileName(fileName)

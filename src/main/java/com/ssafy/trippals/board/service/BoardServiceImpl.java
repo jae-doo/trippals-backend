@@ -85,12 +85,13 @@ public class BoardServiceImpl implements BoardService{
                 boardRepository.boardReadCountUpdate(boardParamDto.getBoardSeq());
             }
 
-            BoardDto dto = boardRepository.findBoardBySeq(boardParamDto.getBoardSeq());
-            List<BoardFileDto> fileList = boardRepository.boardDetailFileList(dto.getSeq());
+            Board board = boardRepository.findBoardBySeq(boardParamDto.getBoardSeq());
+            List<BoardFile> fileList = boardRepository.boardDetailFileList(board.getSeq());
             boolean checkBookmark = bookmarkRepository.existsBoardBookmarkByBoardSeqAndUserSeq(boardParamDto.getBoardSeq(), boardParamDto.getUserSeq());
 
-            dto.setFileList(fileList);
-            boardResultDto.setDto(dto);
+            BoardDto boardDto = new BoardDto(board);
+            boardDto.setFileList(fileList.stream().map(BoardFileDto::new).toList());
+            boardResultDto.setDto(boardDto);
             boardResultDto.setCheckBookmark(checkBookmark);
 
         }catch(Exception e) {
