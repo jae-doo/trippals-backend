@@ -1,10 +1,13 @@
 package com.ssafy.trippals.board.repository;
 
+import com.ssafy.trippals.board.dto.BoardParamDto;
 import com.ssafy.trippals.board.entity.Board;
 import com.ssafy.trippals.board.entity.BoardBookmark;
-import com.ssafy.trippals.user.entity.User;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.Repository;
 
-public interface BookmarkRepository extends JpaRepository<BoardBookmark, Integer> {
+import java.util.List;
+
+public interface BookmarkRepository extends Repository<BoardBookmark, Integer> {
     boolean existsBoardBookmarkByBoardSeqAndUserSeq(int boardSeq, int userSeq);
+    List<Board> findByUserSeq(BoardParamDto bookmarkDto);
 }

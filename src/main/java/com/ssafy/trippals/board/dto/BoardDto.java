@@ -31,6 +31,17 @@ public class BoardDto {
     private String overview;
     private String startDate;
 
+    public BoardDto(Board board) {
+        this.seq = board.getSeq();
+        this.userSeq = board.getUser().getSeq();
+        this.title = board.getTitle();
+        this.content = board.getContent();
+        this.regDt = board.getCreatedTime();
+        this.isDraft = board.isDraft();
+        this.readCount = board.getReadCount();
+        this.writer = board.getUser().getName();
+    }
+
     public Board convertToBoard() {
         return Board.builder()
                 .seq(seq)

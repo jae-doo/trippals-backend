@@ -6,7 +6,7 @@ import com.ssafy.trippals.board.dto.BoardParamDto;
 import com.ssafy.trippals.board.dto.BoardResultDto;
 import com.ssafy.trippals.board.entity.Board;
 import com.ssafy.trippals.board.entity.BoardFile;
-import com.ssafy.trippals.board.repository.BoardCustomRepository;
+import com.ssafy.trippals.board.repository.BoardRepository;
 import com.ssafy.trippals.board.repository.BoardFileRepository;
 import com.ssafy.trippals.board.repository.BoardRepository;
 import com.ssafy.trippals.board.repository.BookmarkRepository;
@@ -29,7 +29,6 @@ public class BoardServiceImpl implements BoardService{
 
     private final BoardRepository boardRepository;
     private final BoardFileRepository boardFileRepository;
-    private final BoardCustomRepository boardCustomRepository;
     private final BookmarkRepository bookmarkRepository;
     private final FileUploadService fileUploadService;
 
@@ -42,8 +41,8 @@ public class BoardServiceImpl implements BoardService{
         BoardResultDto boardResultDto = new BoardResultDto();
 
         try {
-            List<BoardDto> list = boardCustomRepository.findBoard(boardParamDto);
-            int count = boardCustomRepository.countBoard(boardParamDto.getSearchWord());
+            List<Board> list = boardRepository.findBoard(boardParamDto);
+            int count = boardRepository.countBoard(boardParamDto.getSearchWord());
 
             boardResultDto.setList(list);
             boardResultDto.setCount(count);
@@ -61,8 +60,8 @@ public class BoardServiceImpl implements BoardService{
         BoardResultDto boardResultDto = new BoardResultDto();
 
         try {
-            List<BoardDto> list = boardCustomRepository.findBoardBySearchWord(boardParamDto);
-            int count = boardCustomRepository.countBySearchWord(boardParamDto.getSearchWord());
+            List<Board> list = boardRepository.findBoardByTitleLike(boardParamDto);
+            int count = boardRepository.countByTitleLike(boardParamDto.getSearchWord());
             System.out.println(boardParamDto);
             boardResultDto.setList(list);
             boardResultDto.setCount(count);
@@ -80,14 +79,14 @@ public class BoardServiceImpl implements BoardService{
         BoardResultDto boardResultDto = new BoardResultDto();
 
         try {
-            int userReadCnt = boardCustomRepository.findReadByUser(boardParamDto);
+            int userReadCnt = boardRepository.findReadByUser(boardParamDto);
             if( userReadCnt == 0 ) {//두 메소드 한 트랜잭션
-                boardCustomRepository.insertReadByUser(boardParamDto.getBoardSeq(), boardParamDto.getUserSeq());
-                boardCustomRepository.boardReadCountUpdate(boardParamDto.getBoardSeq());
+                boardRepository.insertReadByUser(boardParamDto.getBoardSeq(), boardParamDto.getUserSeq());
+                boardRepository.boardReadCountUpdate(boardParamDto.getBoardSeq());
             }
 
-            BoardDto dto = boardCustomRepository.findBoardBySeq(boardParamDto.getBoardSeq());
-            List<BoardFileDto> fileList = boardCustomRepository.boardDetailFileList(dto.getSeq());
+            BoardDto dto = boardRepository.findBoardBySeq(boardParamDto.getBoardSeq());
+            List<BoardFileDto> fileList = boardRepository.boardDetailFileList(dto.getSeq());
             boolean checkBookmark = bookmarkRepository.existsBoardBookmarkByBoardSeqAndUserSeq(boardParamDto.getBoardSeq(), boardParamDto.getUserSeq());
 
             dto.setFileList(fileList);
