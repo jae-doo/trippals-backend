@@ -3,16 +3,18 @@ package com.ssafy.trippals.board.service;
 import com.ssafy.trippals.board.dto.BoardDto;
 import com.ssafy.trippals.board.dto.BoardFileDto;
 import com.ssafy.trippals.board.dto.BoardParamDto;
-import com.ssafy.trippals.board.dto.BoardResultDto;
 import com.ssafy.trippals.board.entity.Board;
 import com.ssafy.trippals.board.entity.BoardFile;
-import com.ssafy.trippals.board.repository.BoardRepository;
+import com.ssafy.trippals.board.entity.BoardUserRead;
+import com.ssafy.trippals.board.entity.BoardUserReadId;
 import com.ssafy.trippals.board.repository.BoardFileRepository;
 import com.ssafy.trippals.board.repository.BoardRepository;
+import com.ssafy.trippals.board.repository.BoardUserReadRepository;
 import com.ssafy.trippals.board.repository.BookmarkRepository;
 import com.ssafy.trippals.common.exception.BoardNotFoundException;
 import com.ssafy.trippals.common.file.FileUploadService;
 import com.ssafy.trippals.common.file.UploadedFile;
+import com.ssafy.trippals.common.page.dto.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,85 +33,49 @@ public class BoardServiceImpl implements BoardService{
     private final BoardFileRepository boardFileRepository;
     private final BookmarkRepository bookmarkRepository;
     private final FileUploadService fileUploadService;
+    private final BoardUserReadRepository boardUserReadRepository;
 
     private static final String SUCCESS = "success";
     private static final String FAIL = "fail";
 
     @Override
-    public BoardResultDto boardList(BoardParamDto boardParamDto) {
+    public PageResponse<BoardDto> boardList(BoardParamDto boardParamDto) {
 
-        BoardResultDto boardResultDto = new BoardResultDto();
+        List<BoardDto> contents = boardRepository.findBoard(boardParamDto).stream()
+                                .map(BoardDto::new)
+                                .toList();
 
-        try {
-            List<Board> list = boardRepository.findBoard(boardParamDto);
-            int count = boardRepository.countBoard(boardParamDto.getSearchWord());
+        int count = Math.toIntExact(boardRepository.countBoard(boardParamDto.getSearchWord()));
 
-            boardResultDto.setList(list);
-            boardResultDto.setCount(count);
-
-        }catch(Exception e) {
-            e.printStackTrace();
-        }
-
-        return boardResultDto;
-    }
-
-    @Override
-    public BoardResultDto boardListSearchWord(BoardParamDto boardParamDto) {
-
-        BoardResultDto boardResultDto = new BoardResultDto();
-
-        try {
-            List<Board> list = boardRepository.findBoardByTitleLike(boardParamDto);
-            int count = boardRepository.countByTitleLike(boardParamDto.getSearchWord());
-            System.out.println(boardParamDto);
-            boardResultDto.setList(list);
-            boardResultDto.setCount(count);
-
-        }catch(Exception e) {
-            e.printStackTrace();
-        }
-        return boardResultDto;
+        return new PageResponse<>(contents, boardParamDto.getOffset(), boardParamDto.getLimit(), count);
     }
 
     @Override
     @Transactional
-    public BoardResultDto boardDetail(BoardParamDto boardParamDto) {
+    public BoardDto boardDetail(int boardSeq, int userSeq) {
 
-        BoardResultDto boardResultDto = new BoardResultDto();
+        long userReadCnt = boardRepository.findReadByUser(boardSeq, userSeq);
+        Board board = boardRepository.findById(boardSeq)
+                .orElseThrow(BoardNotFoundException::new);
 
-        try {
-            int userReadCnt = boardRepository.findReadByUser(boardParamDto);
-            if( userReadCnt == 0 ) {//두 메소드 한 트랜잭션
-                boardRepository.insertReadByUser(boardParamDto.getBoardSeq(), boardParamDto.getUserSeq());
-                boardRepository.boardReadCountUpdate(boardParamDto.getBoardSeq());
-            }
-
-            Board board = boardRepository.findBoardBySeq(boardParamDto.getBoardSeq());
-            List<BoardFile> fileList = boardRepository.boardDetailFileList(board.getSeq());
-            boolean checkBookmark = bookmarkRepository.existsBoardBookmarkByBoardSeqAndUserSeq(boardParamDto.getBoardSeq(), boardParamDto.getUserSeq());
-
-            BoardDto boardDto = new BoardDto(board);
-            boardDto.setFileList(fileList.stream().map(BoardFileDto::new).toList());
-            boardResultDto.setDto(boardDto);
-            boardResultDto.setCheckBookmark(checkBookmark);
-
-        }catch(Exception e) {
-            e.printStackTrace();
-
+        if( userReadCnt == 0 ) {//두 메소드 한 트랜잭션
+            board.setReadCount(board.getReadCount() + 1);
+            boardUserReadRepository.save(new BoardUserRead(new BoardUserReadId(boardSeq, userSeq)));
         }
 
-        return boardResultDto;
+        List<BoardFile> fileList = boardFileRepository.findAllByBoardSeq(board.getSeq());
+        boolean checkBookmark = bookmarkRepository.existsBoardBookmarkByBoardSeqAndUserSeq(boardSeq, userSeq);
+
+        BoardDto boardDto = new BoardDto(board);
+        boardDto.setBookmark(checkBookmark);
+        boardDto.setFileList(fileList.stream().map(BoardFileDto::new).toList());
+
+        return boardDto;
     }
 
     @Override
     @Transactional
-    //DB 저장 먼저 하면 안되는 이유
-    //DB 트랜잭션 롤백이 catch 보다 우선
-    public BoardResultDto boardInsert(BoardDto dto, MultipartHttpServletRequest request) {
-
-        BoardResultDto boardResultDto = new BoardResultDto();
-
+    public void boardInsert(BoardDto dto, MultipartHttpServletRequest request) {
         List<File> rollbackFileList = new ArrayList<>();
 
         try {
@@ -135,8 +101,6 @@ public class BoardServiceImpl implements BoardService{
 
                 boardFileRepository.save(boardFileDto.convertToBoardFile());
             }
-
-
         }catch(Exception e) {
             e.printStackTrace();
 
@@ -145,18 +109,12 @@ public class BoardServiceImpl implements BoardService{
                     file.delete();
                 }
             }
-
-
         }
-        return boardResultDto;
     }
 
     @Override
     @Transactional
-    public BoardResultDto boardUpdate(BoardDto dto, MultipartHttpServletRequest request){
-
-        BoardResultDto boardResultDto = new BoardResultDto();
-
+    public void boardUpdate(BoardDto dto, MultipartHttpServletRequest request){
         List<File> rollbackFileList = new ArrayList<>();
 
         try {
@@ -186,10 +144,7 @@ public class BoardServiceImpl implements BoardService{
 
                 boardFileRepository.save(boardFileDto.convertToBoardFile());
             }
-
-
-
-        }catch(Exception e) {
+        } catch(Exception e) {
             e.printStackTrace();
 
             for(File file : rollbackFileList) {
@@ -200,16 +155,11 @@ public class BoardServiceImpl implements BoardService{
 
 
         }
-
-        return boardResultDto;
     }
 
     @Override
     @Transactional
-    public BoardResultDto boardDelete(int boardSeq,int userSeq) {
-
-        BoardResultDto boardResultDto = new BoardResultDto();
-
+    public void boardDelete(int boardSeq,int userSeq) {
         try {
             boardFileRepository.findAllByBoardSeq(boardSeq).stream()
                     .map(BoardFile::getFileUuid)
@@ -220,8 +170,6 @@ public class BoardServiceImpl implements BoardService{
             e.printStackTrace();
 
         }
-
-        return boardResultDto;
     }
 
 

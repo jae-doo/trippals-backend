@@ -20,6 +20,7 @@ public class BoardDto {
     private String content;
     private LocalDateTime regDt;
     private boolean isDraft;
+    private boolean isBookmark;
     private int readCount;
     private String writer;
     private List<BoardFileDto> fileList;
