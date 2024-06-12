@@ -1,11 +1,9 @@
 package com.ssafy.trippals.board.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.ssafy.trippals.board.dto.BoardParamDto;
 import com.ssafy.trippals.board.entity.Board;
 import com.ssafy.trippals.common.page.dto.PageParams;
 import jakarta.persistence.EntityManager;
-import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
