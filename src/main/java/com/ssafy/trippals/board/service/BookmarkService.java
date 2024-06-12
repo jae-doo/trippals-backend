@@ -3,15 +3,14 @@ package com.ssafy.trippals.board.service;
 
 import com.ssafy.trippals.board.dto.BoardDto;
 import com.ssafy.trippals.board.dto.BoardParamDto;
+import com.ssafy.trippals.common.page.dto.PageParams;
+import com.ssafy.trippals.common.page.dto.PageResponse;
 
 import java.util.List;
 
 public interface BookmarkService {
-    List<BoardDto> bookmarkList(BoardParamDto boardParamDto);
+    PageResponse<BoardDto> bookmarkList(int userSeq, PageParams pageParams);
 
-    int bookmarkInsert(int boardId,int userSeq);
-    void bookmarkUpdate(int boardId,int userSeq);
+    void bookmarkInsert(int boardId,int userSeq);
     void bookmarkDelete(int boardId,int userSeq);
-
-//    int countBookmark(int userSeq);
 }

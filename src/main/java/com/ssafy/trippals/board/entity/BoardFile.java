@@ -3,6 +3,7 @@ package com.ssafy.trippals.board.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 
 @Entity
@@ -15,7 +16,7 @@ public class BoardFile {
     private Integer seq;
 
     private String fileName;
-    private Long fileSize;
+    private Integer fileSize;
     private String fileContentType;
     private String fileUuid;
 

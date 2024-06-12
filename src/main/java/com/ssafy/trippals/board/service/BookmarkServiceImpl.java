@@ -1,11 +1,17 @@
 package com.ssafy.trippals.board.service;
 
-import com.ssafy.trippals.board.dto.BoardParamDto;
-import com.ssafy.trippals.board.dto.BoardResultDto;
-import com.ssafy.trippals.board.dto.BoardUserVO;
+import com.ssafy.trippals.board.dto.BoardDto;
+import com.ssafy.trippals.board.entity.Board;
+import com.ssafy.trippals.board.entity.BoardBookmark;
 import com.ssafy.trippals.board.repository.BookmarkRepository;
+import com.ssafy.trippals.common.page.dto.PageParams;
+import com.ssafy.trippals.common.page.dto.PageResponse;
+import com.ssafy.trippals.user.entity.User;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -13,31 +19,23 @@ public class BookmarkServiceImpl implements BookmarkService{
     private final BookmarkRepository bookmarkRepository;
 
     @Override
-    public BoardResultDto bookmarkList(BoardParamDto boardParamDto) {
+    @Transactional
+    public PageResponse<BoardDto> bookmarkList(int userSeq, PageParams pageParams) {
+        List<BoardDto> contents = bookmarkRepository.findByUserSeq(userSeq, pageParams)
+                .stream().map(BoardDto::new).toList();
+        int count = bookmarkRepository.countBookmark(userSeq);
 
-        BoardResultDto boardResultDto = new BoardResultDto();
-
-        try {
-            boardResultDto.setList(bookmarkRepository.findByUserSeq(boardParamDto));
-            boardResultDto.setCount(bookmarkRepository.countBookmark(boardParamDto));
-        }catch(Exception e) {
-            e.printStackTrace();
-        }
-        return boardResultDto;
+        return new PageResponse<>(contents, pageParams, count);
     }
 
     @Override
-    public int bookmarkInsert(BoardUserVO boardUserVO) {
-        return bookmarkRepository.insertBookmark(boardUserVO);
+    public void bookmarkInsert(int boardId,int userSeq) {
+        bookmarkRepository.save(new BoardBookmark(new Board(boardId), new User(userSeq)));
     }
 
     @Override
-    public void bookmarkUpdate(BoardUserVO boardUserVO) {
-        //bookmark 이름이 있다면 필요
-    }
-    @Override
-    public void bookmarkDelete(BoardUserVO boardUserVO) {
-        bookmarkRepository.deleteBookmark(boardUserVO);
+    public void bookmarkDelete(int boardSeq,int userSeq) {
+        bookmarkRepository.deleteByBoardSeqAndUserSeq(boardSeq, userSeq);
     }
 
 }

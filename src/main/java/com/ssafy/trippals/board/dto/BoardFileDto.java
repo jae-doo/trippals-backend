@@ -5,6 +5,7 @@ import com.ssafy.trippals.board.entity.BoardFile;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 
 @Data
@@ -13,7 +14,7 @@ public class BoardFileDto {
     private int fileId;
     private int boardSeq;
     private String fileName;
-    private long fileSize;
+    private Integer fileSize;
     private String fileContentType;
     private String fileUUID;
     private LocalDateTime regDt;

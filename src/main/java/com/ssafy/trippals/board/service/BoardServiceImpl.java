@@ -35,9 +35,6 @@ public class BoardServiceImpl implements BoardService{
     private final FileUploadService fileUploadService;
     private final BoardUserReadRepository boardUserReadRepository;
 
-    private static final String SUCCESS = "success";
-    private static final String FAIL = "fail";
-
     @Override
     public PageResponse<BoardDto> boardList(BoardParamDto boardParamDto) {
 
@@ -79,7 +76,7 @@ public class BoardServiceImpl implements BoardService{
         List<File> rollbackFileList = new ArrayList<>();
 
         try {
-            boardRepository.save(dto.convertToBoard()); // useGeneratedKeys="true" keyProperty="boardId"
+            boardRepository.save(dto.convertToBoard());
 
             List<MultipartFile> fileList = request.getFiles("file");
 
@@ -95,7 +92,7 @@ public class BoardServiceImpl implements BoardService{
                 BoardFileDto boardFileDto = new BoardFileDto();
                 boardFileDto.setBoardSeq(boardSeq);
                 boardFileDto.setFileName(uploaded.getFileName());
-                boardFileDto.setFileSize(part.getSize());
+                boardFileDto.setFileSize(Math.toIntExact(part.getSize()));
                 boardFileDto.setFileContentType(part.getContentType());
                 boardFileDto.setFileUUID(uploaded.getFileUUID());
 
@@ -116,7 +113,6 @@ public class BoardServiceImpl implements BoardService{
     @Transactional
     public void boardUpdate(BoardDto dto, MultipartHttpServletRequest request){
         List<File> rollbackFileList = new ArrayList<>();
-
         try {
             Board board = boardRepository.findById(dto.getSeq()).orElseThrow(BoardNotFoundException::new);
 
@@ -138,7 +134,7 @@ public class BoardServiceImpl implements BoardService{
                 BoardFileDto boardFileDto = new BoardFileDto();
                 boardFileDto.setBoardSeq(boardSeq);
                 boardFileDto.setFileName(uploaded.getFileName());
-                boardFileDto.setFileSize(part.getSize());
+                boardFileDto.setFileSize(Math.toIntExact(part.getSize()));
                 boardFileDto.setFileContentType(part.getContentType());
                 boardFileDto.setFileUUID(uploaded.getFileUUID());
 
@@ -160,17 +156,10 @@ public class BoardServiceImpl implements BoardService{
     @Override
     @Transactional
     public void boardDelete(int boardSeq,int userSeq) {
-        try {
-            boardFileRepository.findAllByBoardSeq(boardSeq).stream()
-                    .map(BoardFile::getFileUuid)
-                    .forEach(fileUploadService::deleteFile);
+        boardFileRepository.findAllByBoardSeq(boardSeq).stream()
+                .map(BoardFile::getFileUuid)
+                .forEach(fileUploadService::deleteFile);
 
-            boardRepository.deleteById(boardSeq);
-        }catch(Exception e) {
-            e.printStackTrace();
-
-        }
+        boardRepository.deleteById(boardSeq);
     }
-
-
 }

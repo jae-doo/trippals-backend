@@ -5,7 +5,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.ssafy.trippals.board.dto.BoardParamDto;
 import com.ssafy.trippals.board.dto.OrderByType;
 import com.ssafy.trippals.board.entity.Board;
-import com.ssafy.trippals.board.entity.BoardFile;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -13,10 +13,13 @@ import java.util.List;
 import static com.ssafy.trippals.board.entity.QBoard.board;
 import static com.ssafy.trippals.board.entity.QBoardUserRead.boardUserRead;
 
-@RequiredArgsConstructor
 public class BoardCustomRepositoryImpl implements BoardCustomRepository {
 
     private final JPAQueryFactory queryFactory;
+
+    public BoardCustomRepositoryImpl(EntityManager em) {
+        queryFactory = new JPAQueryFactory(em);
+    }
 
     @Override
     public Long findReadByUser(int boardSeq, int userSeq) {
